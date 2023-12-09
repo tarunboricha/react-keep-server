@@ -3,9 +3,20 @@ import mysql from "mysql";
 import cors from "cors";
 import http from "http";
 import bodyParser from "body-parser"
+import nodemailer from "nodemailer"
 
 const app = express();
 const server = http.createServer(app);
+const transporter = nodemailer.createTransport({
+  host: "smtp.gmail.com",
+  port: 465,
+  secure: true,
+  auth: {
+    // TODO: replace `user` and `pass` values from <https://forwardemail.net>
+    user: "keeperapplication418@gmail.com",
+    pass: "iomh vylv fnka zrxg",
+  },
+})
 
 app.use(bodyParser.urlencoded({extended:true}));
 
@@ -32,6 +43,25 @@ connection.connect((error) => {
   }
 });
 
+
+app.post("/sendEmail", (request, response) => {
+  console.log(request.body);
+  var mailOptions = {
+    from: process.env.SMTP_MAIL,
+    to: request.body.email,
+    subject: "Signup OTP",
+    text: "Your otp is " + request.body.otp + ". Please use this otp to successfully signup."
+  }
+
+  transporter.sendMail(mailOptions, function(error, info){
+    if(error){
+      response.status(500).send(error);
+    }
+    else{
+      response.status(200).send(info);
+    }
+  });
+});
 
 app.get("/notes/:userid", (request, response) => {
   const userid = request.params.userid;
@@ -62,6 +92,7 @@ app.get("/users/:email/:pass", (request, response) => {
   })
 })
 
+
 app.post("/notes", (request, response) => {
   const sql_query = "INSERT INTO notes (title, content, user_id) VALUES (?,?,?);"
   console.log(request.body.title,request.body.content,request.body.userID);
@@ -74,7 +105,7 @@ app.post("/notes", (request, response) => {
       response.status(200).send(result);
     }
   })
-})
+});
 
 app.post("/users", (request, response) => {
   const sql_query = "INSERT INTO users (firstname, lastname, email, password) VALUES (?,?,?,?);"
