@@ -28,11 +28,10 @@ app.use(cors({
 app.use(express.json());
 
 const connection = mysql.createConnection({
-  host : "db4free.net",
-  user : "vcentry",
-  password : "test@123",
-  database : "travelix",
-  port : 3306
+  host: "localhost",
+  user: "root",
+  password: "",
+  database : "test",
 });
 
 connection.connect((error) => {
@@ -47,11 +46,12 @@ connection.connect((error) => {
 
 app.post("/sendEmail", (request, response) => {
   console.log(request.body);
+  let otp = (Math.floor(Math.random() * 10000) + 10000).toString().substring(1);
   var mailOptions = {
     from: process.env.SMTP_MAIL,
     to: request.body.email,
     subject: "Signup OTP",
-    text: "Your otp is " + request.body.otp + ". Please use this otp to successfully signup."
+    text: "Hello " + request.body.firstname + ", Your otp is " + otp + ". Please use this otp to successfully signup into the Keeper application."
   }
 
   transporter.sendMail(mailOptions, function(error, info){
@@ -59,6 +59,7 @@ app.post("/sendEmail", (request, response) => {
       response.status(500).send(error);
     }
     else{
+      info.otp = otp;
       response.status(200).send(info);
     }
   });
