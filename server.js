@@ -8,7 +8,7 @@ import nodemailer from "nodemailer"
 const app = express();
 const server = http.createServer(app);
 const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
+  service: 'Gmail',
   port: 465,
   secure: true,
   auth: {
@@ -16,6 +16,8 @@ const transporter = nodemailer.createTransport({
     user: "keeperapplication418@gmail.com",
     pass: "iomh vylv fnka zrxg",
   },
+  debug: true, // Enable debugging output
+  logger: true, // Enable logging to console
 })
 
 app.use(bodyParser.urlencoded({extended:true}));
@@ -45,10 +47,10 @@ connection.connect((error) => {
 
 
 app.post("/sendEmail", (request, response) => {
+  console.log("Hello");
   console.log(request.body);
   let otp = (Math.floor(Math.random() * 10000) + 10000).toString().substring(1);
   var mailOptions = {
-    from: process.env.SMTP_MAIL,
     to: request.body.email,
     subject: "Signup OTP",
     text: "Hello " + request.body.firstname + ", Your otp is " + otp + ". Please use this otp to successfully signup into the Keeper application."
@@ -85,6 +87,20 @@ app.get("/users/:email/:pass", (request, response) => {
   const sql_query = "SELECT * FROM users WHERE email = ? AND password = ?;"
 
   connection.query(sql_query, [email, password], (error, result) => {
+    if(error){
+      response.status(500).send(error);
+    }
+    else{
+      response.status(200).send(result);
+    }
+  })
+})
+
+app.get("/users/:email", (request, response) => {
+  const email = request.params.email;
+  const sql_query = "SELECT * FROM users WHERE email = ?;"
+
+  connection.query(sql_query, [email], (error, result) => {
     if(error){
       response.status(500).send(error);
     }
