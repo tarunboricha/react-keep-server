@@ -20,11 +20,11 @@ const transporter = nodemailer.createTransport({
   logger: true, // Enable logging to console
 })
 
-app.use(bodyParser.urlencoded({extended:true}));
+app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(cors({
-  credentials : true,
-  origin : "*"
+  credentials: true,
+  origin: "*"
 }));
 
 app.use(express.json());
@@ -33,14 +33,14 @@ const connection = mysql.createConnection({
   host: "localhost",
   user: "root",
   password: "",
-  database : "test",
+  database: "test",
 });
 
 connection.connect((error) => {
-  if(error){
+  if (error) {
     throw error;
   }
-  else{
+  else {
     console.log("Node js server is connected to Online MySQL server");
   }
 });
@@ -56,11 +56,11 @@ app.post("/sendEmail", (request, response) => {
     text: "Hello " + request.body.firstname + ", Your otp is " + otp + ". Please use this otp to successfully signup into the Keeper application."
   }
 
-  transporter.sendMail(mailOptions, function(error, info){
-    if(error){
+  transporter.sendMail(mailOptions, function (error, info) {
+    if (error) {
       response.status(500).send(error);
     }
-    else{
+    else {
       info.otp = otp;
       response.status(200).send(info);
     }
@@ -69,28 +69,29 @@ app.post("/sendEmail", (request, response) => {
 
 app.get("/notes/:userid", (request, response) => {
   const userid = request.params.userid;
-  const sql_query = "SELECT * FROM notes WHERE user_id = ?;"
+  const sql_query = "SELECT * FROM notes WHERE user_id = ?;";
   console.log(sql_query + userid);
+
   connection.query(sql_query, [userid], (error, result) => {
-    if(error){
+    if (error) {
       response.status(500).send(error);
-    }
-    else{
+    } else {
       response.status(200).send(result);
     }
-  })
-})
+  });
+});
 
 app.get("/users/:email/:pass", (request, response) => {
+  //console.log(request);
   const email = request.params.email;
   const password = request.params.pass;
   const sql_query = "SELECT * FROM users WHERE email = ? AND password = ?;"
 
   connection.query(sql_query, [email, password], (error, result) => {
-    if(error){
+    if (error) {
       response.status(500).send(error);
     }
-    else{
+    else {
       response.status(200).send(result);
     }
   })
@@ -101,10 +102,10 @@ app.get("/users/:email", (request, response) => {
   const sql_query = "SELECT * FROM users WHERE email = ?;"
 
   connection.query(sql_query, [email], (error, result) => {
-    if(error){
+    if (error) {
       response.status(500).send(error);
     }
-    else{
+    else {
       response.status(200).send(result);
     }
   })
@@ -113,13 +114,13 @@ app.get("/users/:email", (request, response) => {
 
 app.post("/notes", (request, response) => {
   const sql_query = "INSERT INTO notes (title, content, user_id) VALUES (?,?,?);"
-  console.log(request.body.title,request.body.content,request.body.userID);
+  console.log(request.body.title, request.body.content, request.body.userID);
   console.log(sql_query);
-  connection.query(sql_query, [request.body.title,request.body.content,request.body.userID],(error, result) => {
-    if(error){
+  connection.query(sql_query, [request.body.title, request.body.content, request.body.userID], (error, result) => {
+    if (error) {
       response.status(500).send(error);
     }
-    else{
+    else {
       response.status(200).send(result);
     }
   })
@@ -127,13 +128,13 @@ app.post("/notes", (request, response) => {
 
 app.post("/users", (request, response) => {
   const sql_query = "INSERT INTO users (firstname, lastname, email, password) VALUES (?,?,?,?);"
-  console.log(request.body.firstname,request.body.lastname,request.body.email,request.body.password);
+  console.log(request.body.firstname, request.body.lastname, request.body.email, request.body.password);
   console.log(sql_query);
-  connection.query(sql_query, [request.body.firstname,request.body.lastname,request.body.email,request.body.password],(error, result) => {
-    if(error){
+  connection.query(sql_query, [request.body.firstname, request.body.lastname, request.body.email, request.body.password], (error, result) => {
+    if (error) {
       response.status(500).send(error);
     }
-    else{
+    else {
       response.status(200).send(result);
     }
   })
@@ -141,13 +142,13 @@ app.post("/users", (request, response) => {
 
 app.put("/notes", (request, response) => {
   const sql_query = "UPDATE notes SET title = ?, content = ? WHERE note_id = ?;"
-  
-  connection.query(sql_query, [request.body.title,request.body.content,request.body.note_id], (error, result) => {
-    if(error){
+
+  connection.query(sql_query, [request.body.title, request.body.content, request.body.note_id], (error, result) => {
+    if (error) {
       response.status(500).send(error);
     }
-    else{
-      response.status(200).send("User Account has been modified");
+    else {
+      response.status(200).send(result);
     }
   })
 })
